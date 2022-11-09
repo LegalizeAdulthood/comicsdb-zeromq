@@ -3,6 +3,7 @@
   "name": "comicsdb",
   "version": "1.0.0",
   "dependencies": [
+    "cppzmq",
     "zeromq",
     "rapidjson"
   ]
