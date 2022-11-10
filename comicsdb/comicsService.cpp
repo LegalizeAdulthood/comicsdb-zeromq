@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <thread>
 
@@ -37,6 +38,29 @@ zmq::message_t load(ComicsDb::ComicDb &db)
     return {buffer.GetString(), buffer.GetSize()};
 }
 
+zmq::message_t createComic(const rapidjson::Document &req, ComicsDb::ComicDb &db)
+{
+    auto comicJson = req["comic"].GetObject();
+    ComicsDb::Comic comic;
+    comic.issue = comicJson["issue"].GetInt();
+    comic.title = comicJson["title"].GetString();
+    auto getPerson = [&comicJson](const char *key) { return ComicsDb::findPerson(comicJson[key].GetString()); };
+    comic.script = getPerson("script");
+    comic.pencils = getPerson("pencils");
+    comic.inks = getPerson("inks");
+    comic.letters = getPerson("letters");
+    comic.colors = getPerson("colors");
+    size_t id = createComic(db, std::move(comic));
+
+    rapidjson::Document res;
+    rapidjson::Value &obj = res.SetObject();
+    obj.AddMember(rapidjson::GenericStringRef<char>{"id"}, id, res.GetAllocator());
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    res.Accept(writer);
+    return {buffer.GetString(), buffer.GetSize()};
+}
+
 zmq::message_t unknownRequest()
 {
     std::string response = "Unknown request";
@@ -51,6 +75,8 @@ zmq::message_t processRequest(zmq::message_t &req, ComicsDb::ComicDb &db)
     const std::string request = getString("request");
     if (request == "load")
         return load(db);
+    if (request == "create")
+        return createComic(doc, db);
 
     return unknownRequest();
 }
@@ -73,7 +99,6 @@ int main()
         socket.recv(request, zmq::recv_flags::none);
         std::cout << "Received request '" << request.to_string() << "'\n";
 
-        // do some work
         socket.send(processRequest(request, db), zmq::send_flags::none);
     }
 }
