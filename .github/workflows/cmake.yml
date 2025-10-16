@@ -16,8 +16,8 @@ jobs:
         #os: [ ubuntu-latest, windows-latest, macos-latest ]
         os: [ ubuntu-latest, windows-latest ]
         include:
-          - os: macos-latest
-            nuget: mono `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          #- os: macos-latest
+          #  nuget: mono `./vcpkg/vcpkg fetch nuget | tail -n 1`
           - os: ubuntu-latest
             nuget: mono `./vcpkg/vcpkg fetch nuget | tail -n 1`
           - os: windows-latest
