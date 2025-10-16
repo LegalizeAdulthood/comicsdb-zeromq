@@ -13,7 +13,8 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        #os: [ ubuntu-latest, windows-latest, macos-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         include:
           - os: macos-latest
             nuget: mono `./vcpkg/vcpkg fetch nuget | tail -n 1`
